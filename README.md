@@ -9,13 +9,6 @@ Minimalist, production‑lean backend for the Bank challenge using hexagonal arc
 - Single transaction for debit, credit, transfer record, and outbox event; failures roll back and balances remain correct
 - Outbox notifications decouple external calls so money movement never blocks
 
-### Technologies and patterns
-- Java 21 + Spring Boot 3
-- Hexagonal architecture (domain first)
-- Swagger/OpenAPI docs
-- k6 integration tests with concise reports
-- Docker + Compose with resource caps
-
 
 ## Features Overview
 
@@ -43,7 +36,15 @@ Minimalist, production‑lean backend for the Bank challenge using hexagonal arc
 - k6 test runner at `tests/scripts/run-k6.sh`
 
 
-## Docs
+## Technologies and patterns
+- Java 21 + Spring Boot 3
+- Hexagonal architecture (domain first)
+- Swagger/OpenAPI docs
+- k6 integration tests with concise reports
+- Docker + Compose with resource caps
+
+
+## Complementary Docs
 - Architecture: [docs/architecture.md](docs/architecture.md)
 - Concurrency deep dive: [docs/concurrency.md](docs/concurrency.md)
 - Manual testing: [docs/manual-testing.md](docs/manual-testing.md)
@@ -80,6 +81,11 @@ Reports are stored in `tests/reports/`.
 
 
 ## API
+
+### Swagger
+- UI: `http://localhost:8080/swagger-ui.html`
+- JSON: `http://localhost:8080/v3/api-docs`
+
 ### Create User
 `POST /users`
 
@@ -132,7 +138,3 @@ Response wrapper:
   "error": null
 }
 ```
-
-## Swagger
-- UI: `http://localhost:8080/swagger-ui.html`
-- JSON: `http://localhost:8080/v3/api-docs`
