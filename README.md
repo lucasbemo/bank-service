@@ -1,40 +1,32 @@
 # Bank Service (Spring Boot 3 / Java 21)
 
-Minimalist, production‑lean backend for the Bank challenge using hexagonal architecture, strict idempotency, and concurrency‑safe transfers.
+Minimalist, backend for the Bank service using hexagonal architecture, strict idempotency, and concurrency‑safe transfers.
 
 ## Overview
-- Small, production‑lean backend for a digital bank with users, wallets, and transfers exposed via a simple HTTP API
-- Idempotent transfers: same `Idempotency-Key` and payload return the same result; different payload returns `409`
-- Pessimistic row locks on payer and payee wallets, acquired in deterministic order (lower userId first) to reduce deadlocks
-- Single transaction for debit, credit, transfer record, and outbox event; failures roll back and balances remain correct
-- Outbox notifications decouple external calls so money movement never blocks
+A digital bank backend designed for safe transfers, even with retries and high concurrency.
 
+What it does:
+- Moves money between users safely (payer -> payee), keeping balances correct
+- Prevents double transfers when clients retry the same request (requires `Idempotency-Key`)
+- Handles many transfers happening at the same time without corrupting balances
+- Applies key rules: payer must have funds, some user types can't pay, and an external authorization must approve
 
-## Features Overview
+How it stays correct:
+- Hexagonal architecture: domain rules live in the core; infrastructure (web, DB, external services) plugs in via ports/adapters
+- Strict idempotency for transfers:
+  - Same `Idempotency-Key` + same payload returns the original result
+  - Same `Idempotency-Key` + different payload returns `409` (conflict)
+- Concurrency-safe money movement:
+  - Uses pessimistic row locks on both payer and payee wallets
+  - Locks are acquired in deterministic order (lower userId first) to reduce deadlocks
+- Transactional consistency:
+  - Debit, credit, transfer record, and outbox event are persisted in a single DB transaction
+  - If anything fails, the transaction rolls back and balances remain correct
+- Outbox notifications:
+  - External notifications are emitted from an outbox (best-effort, async)
+  - Money movement never blocks on external calls
 
-### Core Features
-- **User creation** with type `COMMON` or `SHOPKEEPER`
-- **Transfers** between users with strict authorization rules
-- **Idempotency** required for every transfer
-- **Balance safety** with transactional updates
-- **Outbox notifications** (best‑effort, async)
-- **Consistent API wrapper** for success and errors
-
-### Rules Enforced
-- `SHOPKEEPER` users cannot send transfers
-- Payer must have sufficient balance
-- Authorization service must approve transfer
-- Every transfer requires `Idempotency-Key`
-
-### Observability
-- All errors are normalized through a common error wrapper
-- Transfer operations are logged via Spring Boot defaults
-
-### Docs and Tools
-- Swagger UI at `/swagger-ui.html`
-- OpenAPI JSON at `/v3/api-docs`
-- k6 test runner at `tests/scripts/run-k6.sh`
-
+Concurrency deep dive: [docs/concurrency.md](docs/concurrency.md)
 
 ## Technologies and patterns
 - Java 21 + Spring Boot 3
@@ -44,11 +36,60 @@ Minimalist, production‑lean backend for the Bank challenge using hexagonal arc
 - Docker + Compose with resource caps
 
 
-## Complementary Docs
-- Architecture: [docs/architecture.md](docs/architecture.md)
-- Concurrency deep dive: [docs/concurrency.md](docs/concurrency.md)
-- Manual testing: [docs/manual-testing.md](docs/manual-testing.md)
-- Plan: [docs/plan.md](docs/plan.md)
+## High‑Level Diagram
+
+```mermaid
+flowchart LR
+  subgraph Inbound
+    Web[REST Controllers]
+  end
+
+  subgraph Application
+    UseCase[Use Cases]
+  end
+
+  subgraph Domain
+    Model[Entities + Value Objects]
+    Ports[Ports]
+  end
+
+  subgraph Outbound
+    DB[Persistence Adapters]
+    Auth[Authorization HTTP]
+    Notify[Notification HTTP]
+    Outbox[Outbox Scheduler]
+  end
+
+  Web --> UseCase
+  UseCase --> Ports
+  Ports --> DB
+  Ports --> Auth
+  Ports --> Notify
+  Outbox --> Notify
+  UseCase --> Model
+```
+
+## Request Flow (Transfer)
+```mermaid
+sequenceDiagram
+  autonumber
+  participant C as Client
+  participant API as TransferController
+  participant UC as CreateTransferUseCase
+  participant AUTH as AuthorizationPort
+  participant DB as Wallet/Transfer Repos
+  participant OUT as Outbox
+
+  C->>API: POST /transfers (Idempotency-Key)
+  API->>UC: validate + command
+  UC->>AUTH: authorize()
+  AUTH-->>UC: approved/denied
+  UC->>DB: lock wallets + check balance
+  UC->>DB: debit/credit + save transfer
+  UC->>OUT: save outbox event
+  UC-->>API: transfer result
+  API-->>C: response wrapper
+```
 
 
 ## Quick Start
@@ -80,11 +121,23 @@ tests/scripts/run-k6.sh
 Reports are stored in `tests/reports/`.
 
 
+### Docs and Tools
+- Swagger UI at `/swagger-ui.html`
+- OpenAPI JSON at `/v3/api-docs`
+- k6 test runner at `tests/scripts/run-k6.sh`
+
+
+## Complementary Docs
+- Manual testing: [docs/manual-testing.md](docs/manual-testing.md)
+- Plan: [docs/plan.md](docs/plan.md)
+
+
 ## API
 
 ### Swagger
 - UI: `http://localhost:8080/swagger-ui.html`
 - JSON: `http://localhost:8080/v3/api-docs`
+
 
 ### Create User
 `POST /users`
