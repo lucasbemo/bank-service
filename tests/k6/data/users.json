@@ -1,0 +1,5 @@
+[
+  {"id":1,"name":"Example","document":"00000000000","email":"user@example.com","type":"COMMON","balance":1000.00},
+  {"id":2,"name":"Example2","document":"00000000001","email":"user2@example.com","type":"COMMON","balance":500.00},
+  {"id":3,"name":"ExampleShop","document":"00000000002","email":"shop@example.com","type":"SHOPKEEPER","balance":800.00}
+]

@@ -1,0 +1,26 @@
+# Maven
+/target/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+
+# k6 reports (generated)
+/tests/reports/
+
+# Java
+*.class

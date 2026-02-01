@@ -1,0 +1,7 @@
+[
+  {"payer":1,"payee":2,"value":1.50,"idempotencyKey":"load-1"},
+  {"payer":2,"payee":1,"value":2.00,"idempotencyKey":"load-2"},
+  {"payer":1,"payee":2,"value":3.25,"idempotencyKey":"load-3"},
+  {"payer":2,"payee":1,"value":4.10,"idempotencyKey":"load-4"},
+  {"payer":1,"payee":2,"value":2.75,"idempotencyKey":"load-5"}
+]

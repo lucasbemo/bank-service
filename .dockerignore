@@ -1,0 +1,20 @@
+.git
+.gitignore
+.vscode
+.idea
+*.iml
+
+# Build outputs
+target
+
+# Local env
+.env
+.env.*
+
+# Docs/tests not needed for image build
+docs
+tests
+src/test
+
+# Misc
+*.log

@@ -1,0 +1,4 @@
+[
+  {"payer":1,"payee":2,"value":10.00,"idempotencyKey":"smoke-1"},
+  {"payer":2,"payee":1,"value":5.00,"idempotencyKey":"smoke-2"}
+]

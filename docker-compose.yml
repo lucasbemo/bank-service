@@ -1,0 +1,46 @@
+services:
+  app:
+    container_name: bank-service-app
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: ${DB_URL:-jdbc:postgresql://db:5432/bank}
+      DB_USER: ${DB_USER:-bank}
+      DB_PASSWORD: ${DB_PASSWORD:-bank}
+      AUTH_MOCK: ${AUTH_MOCK:-true}
+      NOTIFY_MOCK: ${NOTIFY_MOCK:-true}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-test}
+      AUTH_URL: ${AUTH_URL:-http://localhost:9090/authorize}
+      NOTIFY_URL: ${NOTIFY_URL:-http://localhost:9091/notify}
+    depends_on:
+      - db
+    mem_limit: ${APP_MEM_LIMIT}
+    cpus: ${APP_CPU_LIMIT}
+
+  db:
+    container_name: bank-service-db
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bank}
+      POSTGRES_USER: ${POSTGRES_USER:-bank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bank}
+    ports:
+      - "5432:5432"
+    mem_limit: ${DB_MEM_LIMIT}
+    cpus: ${DB_CPU_LIMIT}
+
+  k6:
+    container_name: bank-service-k6
+    image: grafana/k6:0.49.0
+    working_dir: /k6
+    volumes:
+      - ./tests/k6:/k6
+      - ./tests/reports:/reports
+    environment:
+      BASE_URL: ${K6_BASE_URL:-http://app:8080}
+    entrypoint: ["k6"]
+    depends_on:
+      - app
+    profiles:
+      - k6

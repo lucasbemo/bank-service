@@ -1,0 +1,7 @@
+[
+  {"payer":1,"payee":2,"value":1.00,"idempotencyKey":"spike-1"},
+  {"payer":1,"payee":2,"value":1.10,"idempotencyKey":"spike-2"},
+  {"payer":1,"payee":2,"value":1.20,"idempotencyKey":"spike-3"},
+  {"payer":1,"payee":2,"value":1.30,"idempotencyKey":"spike-4"},
+  {"payer":1,"payee":2,"value":1.40,"idempotencyKey":"spike-5"}
+]

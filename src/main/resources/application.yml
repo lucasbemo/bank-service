@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bank}
+    username: ${DB_USER:${DB_USERNAME:bank}}
+    password: ${DB_PASSWORD:bank}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+
+bank:
+  auth:
+    url: ${AUTH_URL:http://localhost:9090/authorize}
+  notify:
+    url: ${NOTIFY_URL:http://localhost:9091/notify}
+  outbox:
+    batch-size: 50
